@@ -51,7 +51,7 @@ class HomeController extends Controller
     public function update(Request $request)
     {
         $user = Auth::user();
-
+    
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
@@ -59,28 +59,33 @@ class HomeController extends Controller
             'description' => 'nullable|string',
             'avatar' => 'nullable|image|max:2048',
         ]);
-
+    
         $user->name = $validatedData['name'];
         $user->email = $validatedData['email'];
         $user->description = $validatedData['description'];
-
+    
         if ($validatedData['password']) {
-        $user->password = Hash::make($validatedData['password']);
+            $user->password = Hash::make($validatedData['password']);
         }
-
+    
         if ($request->hasFile('avatar')) {
             if ($user->avatar) {
                 Storage::disk('public')->delete($user->avatar);
             }
-
+    
             $avatarPath = $request->file('avatar')->store('avatars', 'public');
             $user->avatar = $avatarPath;
         }
-
+    
         $user->save();
 
-        return redirect()->route('profile')->with('success', 'Profile updated successfully.');
+        $responseData = [
+            'name' => $user->name,
+        ];
+    
+        return response()->json($responseData);
     }
+    
 
     public function getUserRole(User $user)
     {

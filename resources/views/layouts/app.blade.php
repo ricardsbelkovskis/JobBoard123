@@ -16,8 +16,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <!-- Include TinyMCE CSS (optional) -->
-    <link rel="stylesheet" href="https://cdn.tiny.cloud/1/YOUR_API_KEY/tinymce/5/skins/ui/oxide/skin.min.css">
     <!-- Include datatable css -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
     <!-- Alerts -->
@@ -28,7 +26,7 @@
     <!-- Stripe -->
     <script src="https://js.stripe.com/v3/"></script>
     <!-- Include TinyMCE JavaScript -->
-    <script src="https://cdn.tiny.cloud/1/rtb59tyiuc2rs5u3grn6lzaqnyie38ysh99brc3cbvvjdnky/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="https://cdn.tiny.cloud/1/2mhv7n95cs8rylg49m6csc7xi8dywdb23dncmwq0qmhdrxsq/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
     <script src="path/to/your/javascript/file.js"></script>
@@ -44,7 +42,7 @@
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">
-                    {{ config('app.name', 'Laravel') }}
+                    <strong>JOB BOARD</strong>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                     data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
@@ -53,7 +51,6 @@
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
                             <a href="/diy" class="nav-link">LEARN</a>
@@ -63,9 +60,7 @@
                         </li>
                     </ul>
 
-                    <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ms-auto">
-                        <!-- Authentication Links -->
                         @guest
                             @if (Route::has('login'))
                                 <li class="nav-item">
@@ -131,95 +126,85 @@
     <div id="postModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closePostModal()">&times;</span>
-            <ul class="nav nav-tabs">
-                <li class="nav-item">
-                    <a class="nav-link active" onclick="showTab('createListing')">Create a Listing</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" onclick="showTab('createDIYListing')">Create a DIY Listing</a>
-                </li>
-            </ul>
+                <a class="btn btn-dark" style="width:20%;" onclick="showTab('createListing')">Create a Listing</a>
+                <a class="btn btn-dark mt-1 mb-1" style="width:20%" onclick="showTab('createDIYListing')">Create a DIY Listing</a>
             <div class="tab-content">
                 <div id="createListing" class="tab-pane active">
-                    <h1>Create a Listing</h1>
-                    <form action="{{ route('hire.create') }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-
-                        <div class="mb-3">
-                            <label for="title" class="form-label">Title</label>
-                            <input type="text" class="form-control" id="title" name="title" placeholder="Enter the title" required>
+                    <div class="card shadow bg-white rounded">
+                        <div class="card-content p2">
+                            <h5 class="ms-2 mt-2">Create a Listing</h5>
+                                <form action="{{ route('hire.create') }}" class="p-2" method="POST" enctype="multipart/form-data">
+                                    @csrf
+                                    <div class="mb-3">
+                                        <label for="title" class="form-label">Title</label>
+                                        <input type="text" class="form-control" id="title" name="title" placeholder="Enter the title" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="description" class="form-label">Description</label>
+                                        <textarea id="description" class="form-control" name="description" rows="5" placeholder="Enter the description" required></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="price" class="form-label">Price</label>
+                                        <input type="number" class="form-control" id="price" name="price" placeholder="Enter the price" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="time_to_finish" class="form-label">Time to Finish</label>
+                                        <input type="text" class="form-control" id="time_to_finish" name="time_to_finish" placeholder="Enter the estimated time to finish" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="photos" class="form-label">Photos</label>
+                                            <div id="photo-container">
+                                                <input type="file" class="form-control" name="photos[]" required>
+                                            </div>
+                                        <button type="button" id="add-photo-btn" class="btn btn-secondary mt-2">+</button>
+                                    </div>
+                                    <button style="float:right;" type="submit" class="btn btn-dark mb-2">Submit</button>
+                                </form>
                         </div>
-
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea id="description" name="description" rows="5" placeholder="Enter the description" required></textarea>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="price" class="form-label">Price</label>
-                            <input type="number" class="form-control" id="price" name="price" placeholder="Enter the price" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="time_to_finish" class="form-label">Time to Finish</label>
-                            <input type="text" class="form-control" id="time_to_finish" name="time_to_finish" placeholder="Enter the estimated time to finish" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="photos" class="form-label">Photos</label>
-                                <div id="photo-container">
-                                    <input type="file" class="form-control" name="photos[]" required>
-                                </div>
-                            <button type="button" id="add-photo-btn" class="btn btn-secondary mt-2">Add Another Photo</button>
-                        </div>
-
-
-                        <button style="float:right;" type="submit" class="btn btn-primary">Submit</button>
-                    </form>
+                    </div>
                 </div>
                 <div id="createDIYListing" class="tab-pane">
-                    <h3>Create a DIY Listing</h3>
-                    <form action="{{ route('diys.submit') }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <div class="mb-3">
-                            <label for="title" class="form-label">Title</label>
-                            <input type="text" class="form-control" id="title" name="title" placeholder="Enter the title">
-                        </div>
+                    <div class="card">
+                        <div class="card-content p-2">
+                            <h5>Create a DIY Listing</h5>
+                            <form action="{{ route('diys.submit') }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                    <div class="mb-3">
+                                        <label for="title" class="form-label">Title</label>
+                                        <input type="text" class="form-control" id="title" name="title" placeholder="Enter the title">
+                                    </div>
 
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea id="description" name="description" rows="5" placeholder="Enter the description"></textarea>
-                        </div>
+                                    <div class="mb-3">
+                                        <label for="description" class="form-label">Description</label>
+                                        <textarea id="description_hire" name="description" rows="5" class="form-control" placeholder="Enter the description"></textarea>
+                                    </div>
 
-                        <button style="float:right;" type="submit" class="btn btn-primary">Submit</button>
-                    </form>
+                                    <button style="float:right;" type="submit" class="btn btn-dark">Submit</button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Function to open the modal
         function openPostModal() {
             document.getElementById("postModal").style.display = "block";
         }
 
-        // Function to close the modal
         function closePostModal() {
             document.getElementById("postModal").style.display = "none";
         }
 
-        // Function to show a specific tab
         function showTab(tabName) {
             var i, tabContent;
 
-            // Hide all tab content
             tabContent = document.getElementsByClassName("tab-pane");
             for (i = 0; i < tabContent.length; i++) {
                 tabContent[i].style.display = "none";
             }
 
-            // Show the selected tab
             document.getElementById(tabName).style.display = "block";
         }
     </script>
@@ -230,67 +215,53 @@
         }, 2000);
     </script>
 
-    <!-- <script src="https://cdn.tiny.cloud/1/rtb59tyiuc2rs5u3grn6lzaqnyie38ysh99brc3cbvvjdnky/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     <script>
-        tinymce.init({
-            selector: '#description',
-            plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed linkchecker a11ychecker tinymcespellchecker permanentpen powerpaste advtable advcode editimage tinycomments tableofcontents footnotes mergetags autocorrect typography inlinecss',
-            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
-            tinycomments_mode: 'embedded',
-            tinycomments_author: 'Author name',
-            mergetags_list: [
-                { value: 'First.Name', title: 'First Name' },
-                { value: 'Email', title: 'Email' },
-            ],
-        }); -->
-    </script>
+$(document).ready(function() {
+  $('form[action="{{ route('hire.create') }}"]').submit(function(e) {
+    e.preventDefault();
 
-    <script>
-    $(document).ready(function() {
-        $('form[action="{{ route('hire.create') }}"]').submit(function(e) {
-            e.preventDefault(); // Prevent the default form submission
+    var formData = new FormData($(this)[0]);
+    var form = $(this);
 
-            // Get the form data
-            var formData = new FormData($(this)[0]);
+    $.ajax({
+      url: form.attr('action'),
+      type: form.attr('method'),
+      data: formData,
+      processData: false,
+      contentType: false,
+      success: function(response) {
+        console.log(response);
 
-            // Reference to the form element
-            var form = $(this);
+        form[0].reset();
 
-            // Send an AJAX request to the server
-            $.ajax({
-                url: form.attr('action'),
-                type: form.attr('method'),
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    // Handle the response from the server
-                    console.log(response);
-
-                    // Reset the form fields
-                    form[0].reset();
-
-                    // Show a success message popup
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Listing Created',
-                        text: 'The listing has been created successfully!',
-                    });
-                },
-                error: function(xhr, status, error) {
-                    // Handle any error that occurs during the AJAX request
-                    console.log(xhr.responseText);
-                    
-                    // Show an error message popup
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'An error occurred while creating the listing.',
-                    });
-                }
-            });
+        Swal.fire({
+          icon: 'success',
+          title: 'Listing Created',
+          text: 'The listing has been created successfully!',
         });
+
+        var newRow = '<tr onclick="window.location.href=\'' + response.route + '\';" style="cursor: pointer;">';
+        newRow += '<td>' + response.hire.title + '</td>';
+        newRow += '<td>' + response.hire.user.name + '</td>';
+        newRow += '<td class="price-column">' + response.hire.price + '$</td>';
+        newRow += '<td><a href="' + response.paymentRoute + '" class="checkout-icon btn btn-success">Hire</a></td>';
+        newRow += '</tr>';
+
+        $('#HiresTable2 tbody').append(newRow);
+      },
+      error: function(xhr, status, error) {
+        console.log(xhr.responseText);
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'An error occurred while creating the listing.',
+        });
+      }
     });
+  });
+});
+
 </script>
 
 <script>
@@ -307,43 +278,52 @@
 
 
 <script>
-    $(document).ready(function() {
-        $('form[action="{{ route('diys.submit') }}"]').submit(function(e) {
-            e.preventDefault();
+$(document).ready(function() {
+    $('form[action="{{ route('diys.submit') }}"]').submit(function(e) {
+        e.preventDefault();
 
-            var formData = new FormData($(this)[0]);
+        var formData = new FormData($(this)[0]);
 
-            var form = $(this);
+        var form = $(this);
 
-            $.ajax({
-                url: form.attr('action'),
-                type: form.attr('method'),
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    console.log(response);
+        $.ajax({
+            url: form.attr('action'),
+            type: form.attr('method'),
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                console.log(response);
 
-                    form[0].reset();
+                form[0].reset();
 
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'DIY Created',
-                        text: 'The DIY has been created successfully!',
-                    });
-                },
-                error: function(xhr, status, error) {
-                    console.log(xhr.responseText);
+                var diyTable = $('#diyTable tbody');
+                var newRow = $('<tr onclick="window.location.href=\'' + response.route + '\';" style="cursor: pointer;">' +
+                    '<td>' + response.diy.title + '</td>' +
+                    '<td>' + response.diy.user.name + '</td>' +
+                    '<td>' + response.diy.created_at + '</td>' +
+                    '</tr>');
+                diyTable.append(newRow);
 
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'An error occurred while creating the DIY.',
-                    });
-                }
-            });
+                Swal.fire({
+                    icon: 'success',
+                    title: 'DIY Listing Created',
+                    text: 'The DIY listing has been created successfully!',
+                });
+            },
+            error: function(xhr, status, error) {
+                console.log(xhr.responseText);
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while creating the DIY listing.',
+                });
+            }
         });
     });
+});
+
 </script>
 
 <style>
@@ -373,7 +353,7 @@
 
     .modal-content {
         background-color: #fefefe;
-        margin: 5% auto;
+        margin: 2% auto;
         padding: 20px;
         border: 1px solid #888;
         width: 70%;

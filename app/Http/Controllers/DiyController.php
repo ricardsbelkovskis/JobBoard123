@@ -21,15 +21,27 @@ class DiyController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
         ]);
-
+    
         $form = new Diy();
         $form->title = $validatedData['title'];
         $form->description = $validatedData['description'];
         $form->user_id = auth()->id();
         $form->save();
 
-        return redirect('/diy');
+        $responseData = [
+            'route' => route('diys.show', $form),
+            'diy' => [
+                'title' => $form->title,
+                'user' => [
+                    'name' => $form->user->name,
+                ],
+                'created_at' => $form->created_at->diffForHumans(),
+            ],
+        ];
+    
+        return response()->json($responseData);
     }
+    
 
     public function show(Diy $diy)
     {

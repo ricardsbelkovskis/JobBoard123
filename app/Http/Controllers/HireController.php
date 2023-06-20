@@ -71,8 +71,22 @@ class HireController extends Controller
             }
         }
     
-        return redirect()->route('hire.index')->with('success', 'Listing created successfully');
+        // Prepare the JSON response data
+        $responseData = [
+            'route' => route('hire.show', $hire->id),
+            'hire' => [
+                'title' => $hire->title,
+                'user' => [
+                    'name' => $hire->user->name,
+                ],
+                'price' => $hire->price,
+            ],
+            'paymentRoute' => route('hire.payment', ['hire' => $hire->id]),
+        ];
+    
+        return response()->json($responseData);
     }
+    
 
     public function show(Hire $hire)
     {

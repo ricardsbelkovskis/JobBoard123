@@ -10,7 +10,7 @@
       <div class="card shadow bg-white rounded">
         <div class="card-content text-center">
         <img src="{{ asset('storage/' . $user->avatar) }}" class="rounded-circle mt-3 mb-3" width="130" height="130">
-          <p><strong>{{$user->name}}</strong></p>
+          <p><strong id="name">{{ $user->name }}</strong></p>
         </div>
       </div>
       <div class="card mt-3 card shadow bg-white rounded">
@@ -371,41 +371,44 @@ function openSummaryModal() {
 </script>
 
 <script>
-     $(document).ready(function() {
-        $('form[action="{{ route('profile.update') }}"]').submit(function(e) {
-            e.preventDefault();
+$(document).ready(function() {
+    $('form[action="{{ route('profile.update') }}"]').submit(function(e) {
+        e.preventDefault();
 
-            var formData = new FormData($(this)[0]);
+        var formData = new FormData($(this)[0]);
 
-            var form = $(this);
+        var form = $(this);
 
-            $.ajax({
-                url: form.attr('action'),
-                type: form.attr('method'),
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    console.log(response);
+        $.ajax({
+            url: form.attr('action'),
+            type: form.attr('method'),
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                console.log(response);
 
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Profile Updated',
-                        text: 'Your profile has been updated successfully!',
-                    });
-                },
-                error: function(xhr, status, error) {
-                    console.log(xhr.responseText);
+                // Update the form elements
+                $('#name').val(response.name);
 
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'An error occurred while updating your profile.',
-                    });
-                }
-            });
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Profile Updated',
+                    text: 'Your profile has been updated successfully!',
+                });
+            },
+            error: function(xhr, status, error) {
+                console.log(xhr.responseText);
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while updating the profile.',
+                });
+            }
         });
     });
+});
 </script>
 
 <script>

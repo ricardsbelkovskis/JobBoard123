@@ -34,8 +34,7 @@ class CashoutController extends Controller
     {
         $user = Auth::user();
         $purchase = Purchase::findOrFail($request->input('purchase'));
-    
-        // Check if there is an accepted cashout for the given purchase and user
+
         $existingCashout = Cashout::where('user_id', $user->id)
             ->where('purchase_id', $purchase->id)
             ->where('status', 'accepted')
@@ -44,8 +43,7 @@ class CashoutController extends Controller
         if ($existingCashout) {
             return redirect()->back()->with('error', 'Cashout already exists for this purchase.');
         }
-    
-        // Check if there is a pending cashout for the given purchase and user
+  
         $pendingCashout = Cashout::where('user_id', $user->id)
             ->where('purchase_id', $purchase->id)
             ->where('status', 'pending')
@@ -55,7 +53,6 @@ class CashoutController extends Controller
             return redirect()->back()->with('error', 'A cashout request is already pending for this purchase.');
         }
     
-        // Check if there is a rejected cashout for the given purchase and user
         $rejectedCashout = Cashout::where('user_id', $user->id)
             ->where('purchase_id', $purchase->id)
             ->where('status', 'rejected')

@@ -3,12 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Services\CashoutService;
 use App\Models\Purchase;
-use App\Models\Cashout;
 use Illuminate\Support\Facades\Auth;
 
 class CashoutController extends Controller
 {
+    private $cashoutService;
+
+    public function __construct(CashoutService $cashoutService)
+    {
+        $this->cashoutService = $cashoutService;
+    }
+
     public function index()
     {
         return view('cashout.index');
@@ -22,12 +29,12 @@ class CashoutController extends Controller
         })->get();
         $amount = 0;
         $siteFee = 0;
-        
-        $cashoutsPending = Cashout::where('user_id', $user->id)->where('status', 'pending')->get();
-        $cashoutsCompleted = Cashout::where('user_id', $user->id)->where('status', 'accepted')->get();
-        $cashoutsRejected = Cashout::where('user_id', $user->id)->where('status', 'rejected')->get();
-    
-        return view('cashout.index', compact('purchases', 'amount', 'siteFee', 'cashoutsPending', 'cashoutsCompleted','cashoutsRejected'));
+
+        $cashoutsPending = $this->cashoutService->getCashoutsByStatus($user->id, 'pending');
+        $cashoutsCompleted = $this->cashoutService->getCashoutsByStatus($user->id, 'accepted');
+        $cashoutsRejected = $this->cashoutService->getCashoutsByStatus($user->id, 'rejected');
+
+        return view('cashout.index', compact('purchases', 'amount', 'siteFee', 'cashoutsPending', 'cashoutsCompleted', 'cashoutsRejected'));
     }
 
     public function store(Request $request)
@@ -35,67 +42,25 @@ class CashoutController extends Controller
         $user = Auth::user();
         $purchase = Purchase::findOrFail($request->input('purchase'));
 
-        $existingCashout = Cashout::where('user_id', $user->id)
-            ->where('purchase_id', $purchase->id)
-            ->where('status', 'accepted')
-            ->first();
-    
-        if ($existingCashout) {
-            return redirect()->back()->with('error', 'Cashout already exists for this purchase.');
+        $response = $this->cashoutService->createCashout($user->id, $purchase, $request->input('title'), $request->input('account_number'));
+
+        if (!$response['success']) {
+            return redirect()->back()->with('error', $response['message']);
         }
-  
-        $pendingCashout = Cashout::where('user_id', $user->id)
-            ->where('purchase_id', $purchase->id)
-            ->where('status', 'pending')
-            ->first();
-    
-        if ($pendingCashout) {
-            return redirect()->back()->with('error', 'A cashout request is already pending for this purchase.');
-        }
-    
-        $rejectedCashout = Cashout::where('user_id', $user->id)
-            ->where('purchase_id', $purchase->id)
-            ->where('status', 'rejected')
-            ->first();
-    
-        if ($rejectedCashout) {
-            $rejectedCashout->delete(); // Delete the rejected cashout to allow the user to create a new one
-        }
-    
-        // Rest of your code...
-        $siteFee = $purchase->hire->price * 0.1; // Calculate the site fee (10%)
-        $amount = $purchase->hire->price - $siteFee;
-        $total = $amount; // Total is the same as the amount
-        $bankAccount = $request->input('account_number'); // Get the bank account from the request
-    
-        $cashout = new Cashout();
-        $cashout->user_id = $user->id;
-        $cashout->purchase_id = $purchase->id;
-        $cashout->title = $request->input('title');
-        $cashout->amount = $amount;
-        $cashout->fee = $siteFee;
-        $cashout->total = $total;
-        $cashout->status = 'pending'; // Set the status to "pending"
-        $cashout->bank_account = $request->input('account_number'); // Set the bank account
-        $cashout->save();
-    
-        return redirect()->back()->with('success', 'Cashout request submitted successfully.');
+
+        return redirect()->back()->with('success', $response['message']);
     }
-    
-    
 
     public function delete($id)
     {
         $user = Auth::user();
-        $cashout = Cashout::where('id', $id)
-            ->where('user_id', $user->id)
-            ->where('status', 'pending')
-            ->firstOrFail();
 
-        $cashout->delete();
+        $response = $this->cashoutService->deleteCashout($id, $user->id);
 
-        return redirect()->back()->with('success', 'Cashout request deleted successfully.');
+        if (!$response['success']) {
+            return redirect()->back()->with('error', $response['message']);
+        }
+
+        return redirect()->back()->with('success', $response['message']);
     }
-    
-     
 }

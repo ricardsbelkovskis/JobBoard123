@@ -4,14 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Models\Ticket;
 use Illuminate\Http\Request;
+use App\Services\TicketService;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\TicketRequest;
 
 class TicketController extends Controller
 {
+    protected $ticketService;
+
+    public function __construct(TicketService $ticketService)
+    {
+        $this->ticketService = $ticketService;
+    }
+
     public function index()
     {
-        $tickets=Ticket::all();
-    
+        $tickets = $this->ticketService->getAllTickets();
+
         return view('tickets.index', compact('tickets'));
     }
 
@@ -20,36 +29,26 @@ class TicketController extends Controller
         return view('tickets.create');
     }
 
-    public function store(Request $request)
+    public function store(TicketRequest $request)
     {
-        $validatedData = $request->validate([
-            'title' => 'required',
-            'description' => 'required',
-            'type' => 'required',
-        ]);
+        $validatedData = $request->validated();
     
-        $ticket = new Ticket();
-        $ticket->title = $request->input('title');
-        $ticket->description = $request->input('description');
-        $ticket->type = $request->input('type');
-        $ticket->creator_id = auth()->id();
-        $ticket->respond_id = null; // Initially, no admin has responded
-        $ticket->save();
+        $ticket = $this->ticketService->createTicket($validatedData, Auth::id());
     
-        return redirect()->route('tickets.success', $ticket)->with('success', 'Support ticket created successfully.');
+        return redirect()->route('tickets.success', $ticket)
+            ->with('success', 'Support ticket created successfully.');
     }
-    
 
     public function show($id)
     {
-        $ticket = Ticket::findOrFail($id);
+        $ticket = $this->ticketService->getTicketById($id);
 
         return view('admin.tickets.show', compact('ticket'));
     }
 
     public function admin_index()
     {
-        $tickets = Ticket::all();
+        $tickets = $this->ticketService->getAllAdminTickets();
 
         return view('admin.tickets.tickets', compact('tickets'));
     }
@@ -62,19 +61,14 @@ class TicketController extends Controller
     public function update_status(Request $request, $id)
     {
         $validatedData = $request->validate([
-            'status' => 'required' 
+            'status' => 'required'
         ]);
-    
-        try {
-            $ticket = Ticket::findOrFail($id);
-    
-            $ticket->status = $validatedData['status'];
-            $ticket->save();
-    
+
+        $statusUpdated = $this->ticketService->updateTicketStatus($id, $validatedData['status']);
+
+        if ($statusUpdated) {
             return redirect()->back()->with('success', 'Status updated successfully!');
-        } catch (ModelNotFoundException $exception) {
-            return redirect()->back()->with('error', 'Record not found');
-        } catch (Exception $exception) {
+        } else {
             return redirect()->back()->with('error', 'Failed to update status');
         }
     }

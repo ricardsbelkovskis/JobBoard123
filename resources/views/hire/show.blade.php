@@ -66,33 +66,3 @@
 
 @section('scripts')
 @endsection
-
-<!-- 
-
-
-
-
-<div class="card mt-4">
-        <div class="card-header">
-        <div class="functions" style="background-color:transparent;">
-            <div class="d-flex justify-content-end">
-                <div class="btn-group">
-                @if ($hire->user_id === Auth::user()->id)
-                    <form id="deleteDiyForm" action="{{ route('hire.delete', ['hire' => $hire->id]) }}" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" style="margin-left:5px; border-color:transparent; background-color:transparent ">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </form>
-                @endif
-                </div>
-            </div>
-        </div>
-        </div>
-        <div class="card-body">
-            <h5>{{$hire->title}}</h5>
-            <p>{{$hire->description}}</p>
-            <p>Price: {{$hire->price}}$</p>
-            <a href="{{ route('hire.payment', ['hire' => $hire->id]) }}" class="checkout-icon btn btn-success" style="float:right;"><i class="fas fa-shopping-cart"></i></a>
-      </div> -->

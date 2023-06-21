@@ -124,7 +124,7 @@
               @csrf
                 <input type="hidden" name="diy_id" value="{{ $diy->id }}">
                 <div class="form-group">
-                  <textarea name="content" class="form-control" rows="3" placeholder="Write your comment"></textarea>
+                  <textarea name="content" class="form-control" rows="3" placeholder="Write your comment" required></textarea>
                 </div>
                 <button type="submit" class="btn btn-dark mt-3" style="float:right">Submit</button>
             </form>

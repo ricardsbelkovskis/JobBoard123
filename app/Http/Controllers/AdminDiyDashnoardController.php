@@ -2,21 +2,31 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AdminDiyRequest;
 use App\Models\Diy;
 use Illuminate\Http\Request;
+use App\Services\AdminDiyDashboardService;
 
 class AdminDiyDashnoardController extends Controller
 {
+    private $diyDashboardService;
+
+    public function __construct(AdminDiyDashboardService $diyDashboardService)
+    {
+        $this->diyDashboardService = $diyDashboardService;
+    }
+
     public function diy_dashboard()
     {
-        $diy = Diy::all();
+        $diy = $this->diyDashboardService->getAllDiyItems();
 
-        return view('admin.diy',compact('diy'));
+        return view('admin.diy', compact('diy'));
     }
 
     public function deleteDiy(Diy $diy)
     {
-        $diy->delete();
+        $this->diyDashboardService->deleteDiyItem($diy);
+
         return redirect()->back()->with('success', 'DIY item deleted successfully.');
     }
 
@@ -25,16 +35,11 @@ class AdminDiyDashnoardController extends Controller
         return view('admin.edit-diy', compact('diy'));
     }
 
-    public function updateDiy(Request $request, Diy $diy)
+    public function updateDiy(AdminDiyRequest $request, Diy $diy)
     {
-        $validatedData = $request->validate([
-            'title' => 'required',
-            'description' => 'required',
-        ]);
+        $validatedData = $request->validated();
 
-        $diy->title = $request->input('title');
-        $diy->description = $request->input('description');
-        $diy->save();
+        $this->diyDashboardService->updateDiyItem($diy, $validatedData);
 
         return redirect()->back()->with('success', 'DIY updated successfully.');
     }

@@ -74,7 +74,7 @@
                     <div class="row">
                       <div class="col">
                         <h5 class="card-title text-uppercase text-muted mb-0">Listings</h5>
-                        <span class="h2 font-weight-bold mb-0">{{ $ListingCount }}</span>
+                        <span class="h2 font-weight-bold mb-0">{{ $listingCount }}</span>
                       </div>
                     </div>
                     <p class="mt-3 mb-0 text-muted text-sm">
@@ -257,7 +257,7 @@
 
                   <div class="form-group">
                     <label for="avatar">Avatar</label>
-                    <input type="file" class="form-control-file" id="avatar" name="avatar">
+                    <input type="file" class="form-control" id="avatar" name="avatar">
                   </div>
 
                   <div class="form-group">

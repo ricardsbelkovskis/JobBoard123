@@ -3,22 +3,28 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Services\CommentService;
 use App\Models\Comment;
+use App\Http\Requests\CommentRequest;
 
 class CommentController extends Controller
 {
-    public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'diy_id' => 'required|exists:diys,id',
-            'content' => 'required|string',
-        ]);
+    private $commentService;
 
-        $comment = new Comment();
-        $comment->diy_id = $validatedData['diy_id'];
-        $comment->user_id = auth()->user()->id;
-        $comment->content = $validatedData['content'];
-        $comment->save();
+    public function __construct(CommentService $commentService)
+    {
+        $this->commentService = $commentService;
+    }
+
+    public function store(CommentRequest $request)
+    {
+        $validatedData = $request->validated();
+
+        $diyId = $validatedData['diy_id'];
+        $userId = auth()->user()->id;
+        $content = $validatedData['content'];
+
+        $comment = $this->commentService->createComment($diyId, $userId, $content);
 
         return redirect()
             ->back()
@@ -27,11 +33,10 @@ class CommentController extends Controller
 
     public function destroy(Comment $comment)
     {
-        $comment->delete();
+        $this->commentService->deleteComment($comment);
 
         return redirect()
             ->back()
             ->with('success', 'Comment deleted successfully');
     }
 }
-

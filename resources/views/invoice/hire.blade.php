@@ -47,7 +47,7 @@
                         <input type="hidden" name="purchase_id" value="{{ $purchase->id }}">
                         <input type="hidden" name="receiver_id" value="{{ $purchase->user->id }}">
                         <div class="form-group">
-                            <textarea name="message" class="form-control" placeholder="Type your message here" required></textarea>
+                            <textarea name="message" class="form-control" placeholder="Type your message here"></textarea>
                         </div>
                         <button type="submit" class="btn btn-dark mt-2" style="float:right">Send Message</button>
                     </form>

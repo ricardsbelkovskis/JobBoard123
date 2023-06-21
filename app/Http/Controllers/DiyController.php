@@ -3,50 +3,49 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\DiyService;
 use App\Models\Diy;
-use App\Http\Requests\DiyRequest;
-
+use Illuminate\Support\Facades\Auth;
 
 class DiyController extends Controller
 {
-    private $diyService;
-
-    public function __construct(DiyService $diyService)
-    {
-        $this->diyService = $diyService;
-    }
-
     public function index()
     {
-        $diys = $this->diyService->getAllDiys();
+        $diys = Diy::all();
 
         return view('diys.index', ['diys' => $diys]);
     }
 
     public function submit(Request $request)
     {
-        $response = $this->diyService->storeDiy($request);
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+        ]);
+    
+        $form = new Diy();
+        $form->title = $validatedData['title'];
+        $form->description = $validatedData['description'];
+        $form->user_id = auth()->id();
+        $form->save();
 
-        if ($response['success']) {
-            return response()->json([
-                'route' => route('diys.show', $response['diy']),
-                'diy' => [
-                    'title' => $response['diy']->title,
-                    'user' => [
-                        'name' => $response['diy']->user->name,
-                    ],
-                    'created_at' => $response['diy']->created_at->diffForHumans(),
+        $responseData = [
+            'route' => route('diys.show', $form),
+            'diy' => [
+                'title' => $form->title,
+                'user' => [
+                    'name' => $form->user->name,
                 ],
-            ]);
-        } else {
-            return response()->json(['error' => 'Failed to submit DIY']);
-        }
+                'created_at' => $form->created_at->diffForHumans(),
+            ],
+        ];
+    
+        return response()->json($responseData);
     }
+    
 
     public function show(Diy $diy)
     {
-        $diy = $this->diyService->getDiyWithComments($diy);
+        $diy->load('comments');
         $otherDiys = Diy::where('id', '!=', $diy->id)->latest()->take(5)->get();
 
         return view('diys.show', compact('diy', 'otherDiys'));
@@ -54,49 +53,36 @@ class DiyController extends Controller
 
     public function delete(Diy $diy)
     {
-        $response = $this->diyService->deleteDiy($diy);
-
-        if ($response['success']) {
-            return redirect('/diy')->with('success', $response['message']);
-        } else {
-            return redirect('/diy')->with('error', $response['message']);
-        }
+        $diy->delete();
+         return redirect('/diy');
     }
 
-    public function update(DiyRequest $request, Diy $diy)
+    public function update(Request $request, Diy $diy)
     {
-        $validatedData = $request->validated();
+        $request->validate([
+            'title' => 'required',
+            'description' => 'required',
+        ]);
 
-        $response = $this->diyService->updateDiy($request, $diy);
+        $diy->update($request->only(['title', 'description']));
 
-        if ($response['success']) {
-            return redirect()->route('diys.show', $diy)
-                ->with('success', $response['message']);
-        } else {
-            return redirect()->route('diys.show', $diy)
-                ->with('error', $response['message']);
-        }
+        return redirect()->route('diys.show', $diy)
+            ->with('success', 'DIY post updated successfully');
     }
 
     public function addToFavorites(Diy $diy)
     {
-        $response = $this->diyService->addToFavorites($diy);
-
-        if ($response['success']) {
-            return redirect()->back()->with('success', $response['message']);
-        } else {
-            return redirect()->back()->with('error', $response['message']);
-        }
+        Auth::user()->favoriteDiys()->attach($diy);
+        return redirect()
+            ->back()
+            ->with('success', 'Diy added to favorites successfully.');
     }
 
     public function removeFromFavorites(Diy $diy)
     {
-        $response = $this->diyService->removeFromFavorites($diy);
-
-        if ($response['success']) {
-            return redirect()->back()->with('success', $response['message']);
-        } else {
-            return redirect()->back()->with('error', $response['message']);
-        }
+        Auth::user()->favoriteDiys()->detach($diy);
+        return redirect()
+            ->back()
+            ->with('success', 'Diy removed from favorites successfully.');
     }
 }

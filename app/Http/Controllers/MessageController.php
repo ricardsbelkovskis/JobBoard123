@@ -2,29 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\MessageService;
+use App\Models\Conversation;
+use App\Models\Message;
+use App\Models\Ticket;
 use Illuminate\Http\Request;
-use App\Http\Requests\MessageRequest;
 
 class MessageController extends Controller
 {
-    protected $messageService;
-
-    public function __construct(MessageService $messageService)
+    public function store(Request $request)
     {
-        $this->messageService = $messageService;
-    }
+        $validatedData = $request->validate([
+            'purchase_id' => 'required|exists:purchases,id',
+            'receiver_id' => 'required|exists:users,id',
+            'message' => 'required|string|max:255',
+        ]);
 
-    public function store(MessageRequest $request)
-    {
-        $validatedData = $request->validated();
+        $purchase = \App\Models\Purchase::findOrFail($validatedData['purchase_id']);
 
-        $this->messageService->storeMessage(
-            $validatedData['purchase_id'],
-            $validatedData['receiver_id'],
-            $validatedData['message']
-        );
+        $message = new Message();
+        $message->conversation_id = $purchase->conversation->id;
+        $message->sender_id = auth()->user()->id;
+        $message->receiver_id = $validatedData['receiver_id'];
+        $message->message = $validatedData['message'];
+        $message->save();
 
-        return redirect()->back()->with('success', 'Message sent successfully!');
+        return redirect()->back()->with('success', 'Review submitted successfully!');
+
     }
 }

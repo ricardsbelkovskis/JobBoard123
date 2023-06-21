@@ -3,23 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\AdminUsersDashboardService;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule; 
 
 class AdminUsersDashboardController extends Controller
 {
-    private $adminUsersDashboardService;
-
-    public function __construct(AdminUsersDashboardService $adminUsersDashboardService)
-    {
-        $this->adminUsersDashboardService = $adminUsersDashboardService;
-    }
-
     public function users_dashboard()
     {
-        $users = $this->adminUsersDashboardService->getAllUsers();
-
+        $users = User::all();
+    
         return view('admin.users', compact('users'));
     }
 
@@ -30,26 +23,29 @@ class AdminUsersDashboardController extends Controller
 
     public function storeUser(Request $request)
     {
-        $response = $this->adminUsersDashboardService->createUser($request->all());
+        $validatedData = $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:8|confirmed',
+            'admin_role' => 'required',
+        ]);
 
-        if (!$response['success']) {
-            return redirect()->back()->with('error', $response['message']);
-        }
+        $user = new User();
+        $user->name = $request->input('name');
+        $user->email = $request->input('email');
+        $user->password = Hash::make($request->input('password'));
+        $user->admin_role = $request->input('admin_role');
+        $user->save();
 
-        return redirect()->back()->with('success', $response['message']);
+        return redirect()->back()->with('success', 'A new user-profile has been created successfully!');
     }
 
     public function destroyUser(User $user)
     {
-        $response = $this->adminUsersDashboardService->deleteUser($user);
-
-        if (!$response['success']) {
-            return redirect()->back()->with('error', $response['message']);
-        }
-
-        return redirect()->back()->with('success', $response['message']);
+        $user->delete();
+        return redirect()->back()->with('success', 'User deleted successfully.');
     }
-
+    
     public function editUser(User $user)
     {
         return view('admin.edit-user', compact('user'));
@@ -57,12 +53,17 @@ class AdminUsersDashboardController extends Controller
 
     public function updateUser(Request $request, User $user)
     {
-        $response = $this->adminUsersDashboardService->updateUser($user, $request->all());
+        $validatedData = $request->validate([
+            'name' => 'required',
+            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
+            'admin_role' => 'required',
+        ]);
 
-        if (!$response['success']) {
-            return redirect()->back()->with('error', $response['message']);
-        }
+        $user->name = $request->input('name');
+        $user->email = $request->input('email');
+        $user->admin_role = $request->input('admin_role');
+        $user->save();
 
-        return redirect()->back()->with('success', $response['message']);
+        return redirect()->back()->with('success', 'User deleted successfully.');
     }
 }

@@ -118,7 +118,7 @@ Route::get('/hire/{purchase}', [App\Http\Controllers\HomeController::class, 'sho
     ->middleware('auth')
     ->name('invoice.hire.show');
 
-Route::post('/reviews', [App\Http\Controllers\ReviewController::class, 'ReviewStore'])
+Route::post('/reviews', [App\Http\Controllers\HomeController::class, 'ReviewStore'])
     ->middleware('auth')
     ->name('reviews.store');
 
@@ -126,7 +126,7 @@ Route::post('/messages', [App\Http\Controllers\MessageController::class, 'store'
     ->middleware('auth')
     ->name('messages.store');
 
-Route::get('/public-profile/{userId}', [App\Http\Controllers\PublicProfileController::class, 'index'])
+Route::get('/public-profile/{userId}', [App\Http\Controllers\HomeController::class, 'publicProfile'])
     ->middleware('auth')
     ->name('publicProfile');
 

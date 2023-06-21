@@ -171,12 +171,12 @@
                                 @csrf
                                     <div class="mb-3">
                                         <label for="title" class="form-label">Title</label>
-                                        <input type="text" class="form-control" id="title" name="title" placeholder="Enter the title" required>
+                                        <input type="text" class="form-control" id="title" name="title" placeholder="Enter the title">
                                     </div>
 
                                     <div class="mb-3">
                                         <label for="description" class="form-label">Description</label>
-                                        <textarea id="description_hire" name="description" rows="5" class="form-control" placeholder="Enter the description" required></textarea>
+                                        <textarea id="description_hire" name="description" rows="5" class="form-control" placeholder="Enter the description"></textarea>
                                     </div>
 
                                     <button style="float:right;" type="submit" class="btn btn-dark">Submit</button>

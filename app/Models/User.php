@@ -98,10 +98,10 @@ class User extends Authenticatable
         return $this->hasManyThrough(
             Hire::class,
             Purchase::class,
-            'user_id',
-            'id',
-            'id',
-            'hire_id'
+            'user_id', // Foreign key on purchases table
+            'id', // Foreign key on hires table
+            'id', // Local key on users table
+            'hire_id' // Local key on purchases table
         );
     }
 
